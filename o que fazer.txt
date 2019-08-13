@@ -1,0 +1,6 @@
+1)registrar despesas: vetor despesas[ id,[dia, mes, ano], categoria, valor]
+2)listar despesas: printar o vetor despesas
+3) ler id e excluir a despesa do vetor
+4) somar o valor gatos em cada mes e printar
+5) exibir o gato total de cada categoria
+6) exibir gastos total das categorias em ordem decrescente.
