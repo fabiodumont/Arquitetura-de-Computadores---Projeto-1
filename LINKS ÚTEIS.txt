@@ -1,0 +1,5 @@
+https://www.embarcados.com.br/funcoes-e-procedimentos-no-mips/
+http://www.ic.unicamp.br/~pannain/mc542/aulas/ch3_arq.pdf
+http://www.inf.ufpr.br/roberto/ci210/assembly/labAssembly.pdf]
+https://learnxinyminutes.com/docs/mips/
+https://gist.github.com/bsouza/4105834
