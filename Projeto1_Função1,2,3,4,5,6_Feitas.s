@@ -23,7 +23,7 @@
 	msgRegistroConcluido:			.asciiz	"\nRegistro realizado com sucesso!\n "
 	msgExcluir:				.asciiz "\nInsira o ID que deseja excluir: "
 	msgGastoMensal:			.asciiz "\nGasto Mensal:\n"
-	msgExclusaoSucesso:			.asciiz "\nExclusao feita com Sucesso!"
+	msgExclusaoSucesso:			.asciiz "\nExclusao feita com Sucesso!\n"
 	msgGastoPorCategoria:			.asciiz "\n Gasto por categoria:\n"
 	msgRanking:				.asciiz "\n Ranking de despesas:\n"
 	msgInvalida:            .asciiz "\n A Opcao escolhida nao existe\n"
@@ -89,8 +89,8 @@ main:
 		la $a0, msgId				# printa mensagem
 		syscall				
 		lw $s0, idContador				
-		lw $s1, despesasFim			# pega o endereço da ultima despesa
-		sw $s0, 0($s1)				# escreve no endereço que pegou
+		lw $s1, despesasFim			# pega o endere?o da ultima despesa
+		sw $s0, 0($s1)				# escreve no endere?o que pegou
 		li $v0, 1					# printa o ID da despesa que vai ser cadastrada
 		add $a0, $zero, $s0
 		syscall
@@ -110,13 +110,10 @@ main:
 		syscall
 		li $v0, 5		#  recebe um inteiro
 		syscall		
-		lw $s1, despesasFim  # pega o endereço da posição certa
+		lw $s1, despesasFim  # pega o endere?o da posi??o certa
 		sb $v0, 0($s1)       # guarda o dia digitado
-		li $v0, 1
-		add $a0, $zero, $v0
-		syscall
-		addi $s1, $s1, 1   # vai próxima posição
-		sw $s1, despesasFim   # guarda o endereço da nova posição
+		addi $s1, $s1, 1   # vai pr?xima posi??o
+		sw $s1, despesasFim   # guarda o endere?o da nova posi??o
 					
 					## Cadastro Mes ##
 					
@@ -125,9 +122,9 @@ main:
 		syscall
 		li $v0, 5		# recebe inteiro
 		syscall
-		lw $s1, despesasFim  # pega o endereço da posição certa
-		sb $v0, 0($s1)       # guarda o mes na posição certa
-		addi $s1, $s1, 1     # vai pra próxima posição
+		lw $s1, despesasFim  # pega o endere?o da posi??o certa
+		sb $v0, 0($s1)       # guarda o mes na posi??o certa
+		addi $s1, $s1, 1     # vai pra pr?xima posi??o
 		sw $s1, despesasFim
 		
 					## Cadastro Ano ##
@@ -137,9 +134,9 @@ main:
 		syscall
 		li $v0, 5		# recebe inteiro
 		syscall
-		lw $s1, despesasFim		# pega o endereço da posição
-		sb $v0, 0($s1)			# guarda o ano na posição
-		add $s1, $s1, 1			# vai pra próxima posição
+		lw $s1, despesasFim		# pega o endere?o da posi??o
+		sb $v0, 0($s1)			# guarda o ano na posi??o
+		add $s1, $s1, 1			# vai pra pr?xima posi??o
 		sw $s1, despesasFim
 		
 					## Cadastro Nome ##
@@ -147,13 +144,13 @@ main:
 		li $v0, 4
 		la $a0, msgCategoria
 		syscall
-		li $a1, 15	     # tamanho máximo da string a ser digitada
+		li $a1, 15	     # tamanho m?ximo da string a ser digitada
 		li $v0, 8  		 # recebe uma string
-		lw $s1, despesasFim  # pega o endereço certo para cadastrar
+		lw $s1, despesasFim  # pega o endere?o certo para cadastrar
 		add $a0, $s1, $zero
 		syscall
 		addi $s1, $s1, 16     # anda 16 bytes
-		sw $s1, despesasFim  # guarda o endereço novo
+		sw $s1, despesasFim  # guarda o endere?o novo
 		
 					## Cadastro Valor ##
 					
@@ -162,10 +159,14 @@ main:
 		syscall
 		li $v0, 6		# recebe um float
 		syscall
-		lw $s1, despesasFim  # pega o endereço para cadastrar
+		lw $s1, despesasFim  # pega o endere?o para cadastrar
 		s.s $f0, 0($s1)
-		addi $s1, $s1, 4   # vai pra próxima posição do vetor
-		sw $s1, despesasFim  # guarda o endereço da última despesa
+		addi $s1, $s1, 4   # vai pra pr?xima posi??o do vetor
+		sw $s1, despesasFim  # guarda o endere?o da ?ltima despesa
+		
+		li $v0, 4
+		la $a0, msgRegistroConcluido
+		syscall
 		
 		jal quebrarLinha
 		
@@ -182,18 +183,18 @@ main:
 		# LOOP
 		lw $s6, idContadorAux  # coloca a quantidade de despesas em s6
 		add $s6, $s6, -1
-		add $t4, $zero, $zero     # contador j do loop (até chegar em idContador)
-		add $t5, $zero, $zero 	  # contador i do loop (até chegar em idContador)
-		la $a1, despesas    # pega o endereço da primeira despesa
-		lw $s0, despesasFim # pega o endereço da última despesa
+		add $t4, $zero, $zero     # contador j do loop (at? chegar em idContador)
+		add $t5, $zero, $zero 	  # contador i do loop (at? chegar em idContador)
+		la $a1, despesas    # pega o endere?o da primeira despesa
+		lw $s0, despesasFim # pega o endere?o da ?ltima despesa
 		ListarInicioFor2:
 		bne $s6, $t5, ListarInicioFor1  # (se s6 =! t5, pula pra ListaFor1) 
 		j ListarFim
 		ListarInicioFor1:
 		bne $s6, $t4, ListarFor1  # (se s5 =! t4, pula para ListaFor1)
-		add $t4, $zero, $zero	# contador j do loop (até chegar em idContador)
+		add $t4, $zero, $zero	# contador j do loop (at? chegar em idContador)
 		addi $t5, $t5, 1      # soma 1 no contador i
-		la $a1, despesas    # coloca o endereço da primeira despesa em a1
+		la $a1, despesas    # coloca o endere?o da primeira despesa em a1
 		j ListarInicioFor2
 		ListarFor1:
 		jal converteDias
@@ -211,7 +212,7 @@ main:
 		
 		# PILHA
 		# guarda na pilha para poder pegar depois
-		addi $sp, $sp, -4    # libera espaço
+		addi $sp, $sp, -4    # libera espa?o
 		lw $t0, 0($a1)
 		sw $t0, 0($sp)
 		addi $sp, $sp, -4
@@ -338,13 +339,16 @@ main:
 		
 		############### EXCLUIR DESPESAS ###############
 		excluir_despesas:
-		li $v0, 4
-		la $a0, msgId2
-		syscall
 		
 		li $v0, 4
 		la $a0, Opcao3
 		syscall
+		
+		li $v0, 4
+		la $a0, msgId2
+		syscall
+		
+		
 		
 		li $v0, 5
 		syscall
@@ -394,11 +398,16 @@ main:
 		s.s $f1, 20($s0)
 		
 		ExcluirFim:
+		
+		li $v0, 4
+		la $a0, msgExclusaoSucesso
+		syscall
 		li $v0, 4
 		la $a0, msgSair
 		syscall
 		li $v0, 12
 		syscall
+		
 		jal quebrarLinha
 		
 		j menu
@@ -773,9 +782,9 @@ compararStrings:
 addi $s7, $zero, -1
 addi $t5, $zero, 10
 # se a primeira string recebida for > a segunda, return 0
-# caso contrário, return 1
+# caso contr?rio, return 1
 # iguais, return 2
-# endereços: palavra1 em a0 e palavra2 em a1
+# endere?os: palavra1 em a0 e palavra2 em a1
 # numero retornado em v0
 addi $t0, $zero, 0
 compararStringsFor1:
