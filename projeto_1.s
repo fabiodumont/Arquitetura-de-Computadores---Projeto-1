@@ -1,41 +1,43 @@
 .data
 
 	despesas:     	.space 480
-	despesasFim: 	.word 0
-	idCont: 		.word 0
-	idContAux: .word 0
+	despesasFim: .word 0
+	idContador: .word 0
+	idContadorAux: .word 0
 		
-	msgInicio:  			.asciiz "\nCONTROLE DE DESPESAS\n"
+	msgInicio:  				.asciiz "\nCONTROLE DE DESPESAS\n"
 	msgMenu: 				.asciiz "\nMenu:\n 1) Registrar despesa \n 2) Listar despesas \n 3) Excluir despesa\n 4) Exibir gasto mensal \n 5) Exibir por categoria \n 6) Exibir ranking de despesas \n 0) Sair \n Insira um valor de 0 a 6:\n"
 	msgId:					.asciiz	"\nInsira o ID da despesa "
 	msgId2:					.asciiz "\nID: "
-	msgRegistroDespesa:		.asciiz "\nInsira a data da despesa:"
+	msgRegistroDespesa:			.asciiz "\nInsira a data da despesa:"
 	msgDia: 	   			.asciiz "\nDigite o dia: "
 	msgDia2:                .asciiz "Dia: "
 	msgMes: 	   			.asciiz "\nDigite o mes(ex. abril = 4): "
 	msgMes2:                .asciiz "Mes "
 	msgAno: 	   			.asciiz "\nDigite o ano(Somente os dois ultimos numeros): "
 	msgAno2:                .asciiz "Ano: "
-	msgCategoria:			.asciiz	"\nInsira a categoria: "
+	msgCategoria:				.asciiz	"\nInsira a categoria: "
 	msgCategoria2:          .asciiz "Categoria: "
 	msgValor:				.asciiz	"\nInsira o valor da despesa: "
 	msgValor2:              .asciiz "Valor: "
-	msgRegistroConcluido:	.asciiz	"\nRegistro realizado com sucesso!\n "
+	msgRegistroConcluido:			.asciiz	"\nRegistro realizado com sucesso!\n "
 	msgExcluir:				.asciiz "\nInsira o ID que deseja excluir: "
 	msgGastoMensal:			.asciiz "\nGasto Mensal:\n"
-	msgExclusaoSucesso:		.asciiz "\nExclusao feita com Sucesso!"
-	msgGastoPorCategoria:	.asciiz "\n Gasto por categoria:\n"
+	msgExclusaoSucesso:			.asciiz "\nExclusao feita com Sucesso!\n"
+	msgGastoPorCategoria:			.asciiz "\n Gasto por categoria:\n"
 	msgRanking:				.asciiz "\n Ranking de despesas:\n"
 	msgInvalida:            .asciiz "\n A Opcao escolhida nao existe\n"
 	quebraLinha: 			.asciiz "\n"
 	espaco:					.asciiz "  "
-	msgSair:  				.asciiz "Pressione algum botao para sair"
+	msgSair:  					.asciiz "Pressione algum botao para sair"
 	zerofloat:              .float 0.0
-	Opcao1: 				.asciiz "\n Registro de despesas\n"
-	Opcao2: 				.asciiz "\n Lista de despesas\n"
-	Opcao4: 				.asciiz "\nExibir gasto mensal\n"
-	msgSem_id:				.asciiz "\nO ID nao existe\n"
-	
+	NaoExisteId:            .asciiz "ID nao encontrado\n"
+	Opcao1: .asciiz "\n Registro de despesas\n"
+	Opcao2: .asciiz "\n Lista de despesas\n"
+	Opcao3: .asciiz "\nExcluir despesas"
+	Opcao4: .asciiz "\nExibir gasto mensal\n"
+	Opcao5: .asciiz "\nExibir gasto por categoria\n"
+	Opcao6: .asciiz "\nExibit ranking de despesas\n"
 	
 .text
 main:
@@ -44,14 +46,7 @@ main:
 	sw $s0, despesasFim
 	
 	lw $s1, despesasFim
-	
-	addi $t1, $zero, -1	# Seta t1 com -1 (ira indicar bloco livre para gravacao)
-	setaVetor:
-		sw $t1, despesas($t0)	# Grava -1 em todas as primeiras posicoes dos blocos
-		addi $t0, $t0, 24	# incrementa indice
-		bne $t0, 480, setaVetor
 	#mensagens de introducao
-	
 	
 	menu:
 		li $v0, 4					# Codigo SysCall p/ escrever strings
@@ -81,15 +76,8 @@ main:
 		j menu
 		
 		
+		
 		############### REGISTRAR ###############
-		
-		add $t1, $zero, $zero
-		teste_registro:
-		lw $t0, despesas($t1)
-		beq $t0, -1, registrar
-		addi $t0, $t0, 24
-		j teste_registro
-		
 		registrar:
 		li $v0, 4
 		la $a0, Opcao1
@@ -100,17 +88,17 @@ main:
 		li $v0, 4
 		la $a0, msgId				# printa mensagem
 		syscall				
-		lw $s0, idCont				
+		lw $s0, idContador				
 		lw $s1, despesasFim			# pega o endereço da ultima despesa
 		sw $s0, 0($s1)				# escreve no endereço que pegou
 		li $v0, 1					# printa o ID da despesa que vai ser cadastrada
 		add $a0, $zero, $s0
 		syscall
 		addi $s0, $s0, 1
-		sw $s0, idCont				# Soma 1 no idCont
-		lw $t0, idContAux
+		sw $s0, idContador				# Soma 1 no idContador
+		lw $t0, idContadorAux
 		addi $t0, $t0, 1
-		sw $t0, idContAux			# Soma 1 no idContAux
+		sw $t0, idContadorAux			# Soma 1 no idContadorAux
 		
 		addi $s1, $s1, 1
 		sw $s1, despesasFim			# anda 1 byte no vetor
@@ -124,9 +112,9 @@ main:
 		syscall		
 		lw $s1, despesasFim  # pega o endereço da posição certa
 		sb $v0, 0($s1)       # guarda o dia digitado
-		li $v0, 1
-		add $a0, $zero, $v0
-		syscall
+		#li $v0, 1
+		#add $a0, $zero, $v0
+		#syscall
 		addi $s1, $s1, 1   # vai próxima posição
 		sw $s1, despesasFim   # guarda o endereço da nova posição
 					
@@ -179,22 +167,14 @@ main:
 		addi $s1, $s1, 4   # vai pra próxima posição do vetor
 		sw $s1, despesasFim  # guarda o endereço da última despesa
 		
+		
 		li $v0, 4
 		la $a0, msgRegistroConcluido
 		syscall
 		
-		
 		j menu
 		
 		############### LISTAR DESPESAS ###############
-		add $t1, $zero, $zero
-		teste_despesas:
-		lw $t0, despesas($t1)
-		slti $t1, $t0, 0
-		bne $t1, 0, listar_despesas
-		addi $t0, $t0, 23
-		j teste_despesas
-		
 		listar_despesas:
 		li $v0, 4
 		la $a0, Opcao2
@@ -203,10 +183,10 @@ main:
 		addi $t6, $zero, 30		# dias por mes
 		
 		# LOOP
-		lw $s6, idContAux  # coloca a quantidade de despesas em s6
+		lw $s6, idContadorAux  # coloca a quantidade de despesas em s6
 		add $s6, $s6, -1
-		add $t4, $zero, $zero     # contador j do loop (até chegar em idCont)
-		add $t5, $zero, $zero 	  # contador i do loop (até chegar em idCont)
+		add $t4, $zero, $zero     # contador j do loop (até chegar em idContador)
+		add $t5, $zero, $zero 	  # contador i do loop (até chegar em idContador)
 		la $a1, despesas    # pega o endereço da primeira despesa
 		lw $s0, despesasFim # pega o endereço da última despesa
 		ListarInicioFor2:
@@ -214,7 +194,7 @@ main:
 		j ListarFim
 		ListarInicioFor1:
 		bne $s6, $t4, ListarFor1  # (se s5 =! t4, pula para ListaFor1)
-		add $t4, $zero, $zero	# contador j do loop (até chegar em idCont)
+		add $t4, $zero, $zero	# contador j do loop (até chegar em idContador)
 		addi $t5, $t5, 1      # soma 1 no contador i
 		la $a1, despesas    # coloca o endereço da primeira despesa em a1
 		j ListarInicioFor2
@@ -361,117 +341,74 @@ main:
 		
 		############### EXCLUIR DESPESAS ###############
 		excluir_despesas:
+			
 		li $v0, 4
-		la $a0, msgExcluir
+		la $a0, Opcao3
 		syscall
-		li $v0, 5		# recebe inteiro
-		syscall
-		add $t2, $v0, $zero
-		addi $t3, $zero, 480
 		
-		procurar_id:
-		lb $t1, despesas($t0)
-		beq $t1, $t2, excluir
-		addi $t0, $t0, 24
-		beq $t0, $t3, nao_existe_id
-		j procurar_id
-		
-		excluir:
-		beq $t0, -1 nao_existe_id
-		addi $t1, $zero, -1
-		sb $t1, despesas($t0)
-		j exclusao_sucesso
-		
-		#soma:
-		#addi $t0, $t0, 23
-		#bne $t0, 479, soma
-		#
-		#subtracao:
-		#lw $t1, despesas($t0)
-		#bne $t1, -1, shift
-		#subi $t0, $t0, 23
-		#j subtracao
-		#	
-		#
-		#shift:
-		#add $t5, $zero, $zero
-		#addi $t5, $t5, -1
-		#addi $sp, $zero, -4
-		#subi $t0, $t0, 4
-		#lw $t1, despesas($t0)
-		#sw $t1, 0($sp)
-		#sw $t5, 19($t0)
-		#addi $sp, $zero, -16
-		#subi $t0, $t0, 19
-		#lw $t1, despesas($t0)
-		#sw $t1, 0($sp)
-		#sw $t5, 4($t0)
-		#addi $sp, $zero, -1
-		#subi $t0, $t0, 1
-		#lw $t1, despesas($t0)
-		#sw $t1, 0($sp)
-		#sw $t5, 3($t0)
-		#addi $sp, $zero, -1
-		#subi $t0, $t0, 1
-		#lw $t1, despesas($t0)
-		#sw $t1, 0($sp)
-		#sw $t5, 2($t0)
-		#addi $sp, $zero, -1
-		#subi $t0, $t0, 1
-		#lw $t1, despesas($t0)
-		#sw $t1, 0($sp)
-		#sw $t5, 1($t0)
-		#addi $sp, $zero, -1
-		#subi $t0, $t0, 1
-		#lw $t1, despesas($t0)
-		#sw $t1, 0($sp)
-		#sw $t5, 0($t0)
-		#subi $t0, $t0, 23
-		#
-		#subtracao1:
-		#lw $t1, despesas($t0)
-		#beq $t1, -1, substituicao
-		#subi $t0, $t0, 23
-		#j subtracao1
-		#
-		#substituicao:
-		#lw $t1, 0($sp)
-		#sw $t1, despesas($t0)
-		#addi $t0, $t0, 1
-		#lw $t1, 1($sp)
-		#sw $t1, despesas($t0)
-		#addi $t0, $t0, 1
-		#lw $t1, 2($sp)
-		#sw $t1, despesas($t0)
-		#addi $t0, $t0, 1
-		#lw $t1, 3($sp)
-		#sw $t1, despesas($t0)
-		#addi $t0, $t0, 1
-		#lw $t1, 4($sp)
-		#sw $t1, despesas($t0)
-		#addi $t0, $t0, 19
-		#lw $t1, 19($sp)
-		#sw $t1, despesas($t0)
-		#
-		#addi $sp, $sp, 24
-				
-	
-		
-		nao_existe_id:
 		li $v0, 4
-		la $a0, msgSem_id
+		la $a0, msgId2
 		syscall
 		
-		j excluir_despesas
+		li $v0, 5
+		syscall
 		
-		exclusao_sucesso:
+		la $s0, despesas
+		lw $s1, despesasFim
+		
+		ExcluirInicioFor:
+		bne $s0, $s1, ExcluirInicioLoop
+		
+		li $v0, 4
+		la $a0, NaoExisteId
+		syscall
+		
+		j ExcluirFim
+		
+		ExcluirInicioLoop:
+		lb $t0, 0($s0)
+		beq $t0, $v0, idEncontrado
+		addi $s0, $s0, 24
+		j ExcluirInicioFor
+		
+		idEncontrado:
+		addi $s1, $s1, -24
+		sw $s1, despesasFim
+		
+		lw $t1, idContadorAux
+		addi $t1, $t1, -1
+		sw $t1, idContadorAux
+		
+		lw $s4, 0($s1)
+		sw $s4, 0($s0)
+		
+		lw $s4, 4($s1)
+		sw $s4, 4($s0)
+		
+		lw $s4, 8($s1)
+		sw $s4, 8($s0)
+		
+		lw $s4, 12($s1)
+		sw $s4, 12($s0)
+		
+		lw $s4, 16($s1)
+		sw $s4, 16($s0)
+		
+		l.s $f1, 20($s1)
+		s.s $f1, 20($s0)
+		
+		ExcluirFim:
 		li $v0, 4
 		la $a0, msgExclusaoSucesso
 		syscall
+		li $v0, 4
+		la $a0, msgSair
+		syscall
+		li $v0, 12
+		syscall
+		jal quebrarLinha
 		
 		j menu
-		
-		
 		
 		############### EXIBIR GASTO MENSAL ###############
 		exibir_gasto_mensal:
@@ -548,10 +485,114 @@ main:
 		j menu
 		
 		
-		############### EXIBIR GASTO CATEGORIA ###############
+		
+		
+		############### EXIBIR GASTO POR CATEGORIA ###############
 		exibir_gasto_por_categoria:
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		############### EXIBIR RANKING DE DESPESAS ###############
 		exibir_ranking_de_despesas:
+		
+		li $v0, 4
+		la $a0, Opcao6
+		syscall
+		
+		la $s0, despesas
+		lw $s1, despesasFim
+		addi $s2, $sp, 0
+		
+		#empilhar o endereco das categorias de cada despesa
+		empilharEnderecosMenu6:
+		bne $s0, $s1, empilharCategorias
+		j terminouDeEmpilhar
+		empilharCategorias:
+		
+		addi $t1, $s0, 20	# pega o endereco do valor
+		addi $t0, $s0, 4	# pega o endereco do primeimro caracter da string
+		addi $sp, $sp, -8   # libera espaco na pilha
+		l.s $f2, 0($t1)
+		s.s $f2, 0($sp)
+		sw $t0, 4($sp)
+		addi $s0, $s0, 24
+		
+		j empilharEnderecosMenu6
+		terminouDeEmpilhar:
+		
+		add $s4, $zero, $s2
+		add $a3, $zero, $s2
+		addi $s4, $s4, -8
+		
+		jal tirarIguaisPilha
+		addi $s4, $a3, -8
+		addi $s5, $a3, -8
+		add  $s6, $zero, $sp
+		
+		ordenandoFor1:
+		bne $s5, $sp, ordenandoPilha
+		j acabouOrdenar
+		ordenandoPilha:
+		bne $s4, $s6, ordenarMenu6
+		addi $s4, $a3, -8
+		addi $s6, $s6, 8
+		addi $s5, $s5, -8
+		j ordenandoFor1
+		ordenarMenu6:
+		l.s $f1, 0($s4)
+		l.s $f2, -8($s4)
+		
+		c.le.s 0 $f2, $f1  # se f2 for maior ou igual a f1
+		bc1t 0 trocaMenu6
+		j naoTrocaMenu6
+		trocaMenu6:
+		
+		l.s $f1, 0($s4)
+		l.s $f2, -8($s4)
+		s.s $f2, 0($s4)
+		s.s $f1, -8($s4)
+		
+		lw $s1, 4($s4)
+		lw $s2, -4($s4)
+		sw $s2, 4($s4)
+		sw $s1, -4($s4)
+		
+		naoTrocaMenu6:
+		addi $s4, $s4, -8
+		j ordenandoPilha
+		ordenandoFor2:
+		
+		acabouOrdenar:
+		jal imprimirPilha
+		
+		jal quebrarLinha
+		
+		li $v0, 4
+		la $a0, msgSair
+		syscall
+		li $v0, 12
+		syscall
+		
+		jal quebrarLinha
+		
+		j menu
+		
+		
 	
+		
+		
+	###############################################
 
 quebrarLinha:
 li $v0, 4
@@ -559,12 +600,17 @@ la $a0, quebraLinha
 syscall
 jr $ra
 
+###############################################
+
 espacoProcedimento:
 li $v0, 4
 la $a0, espaco
 syscall
 jr $ra
 
+###############################################
+
+# converte ano e mes para dias para poder ordenar
 
 converteDias:
 lb $t0, 3($a1) # carrega o ano em t0
@@ -576,6 +622,129 @@ lb $t1, 1($a1) #carrega o dia em t1
 add $t0, $t1, $t0
 add $v0, $zero $t0
 jr $ra
+
+
+###############################################
+
+# tirar categorias repetidas da pilha
+
+tirarIguaisPilha:
+arrumaPilha:
+sltu $t0, $sp, $s4
+bne $t0, $zero, tirarIguaisDaPilha
+
+j terminouDeTirarIguais
+tirarIguaisDaPilha:
+
+addi $s5, $s4, -8
+for1TirarIguais:
+sltu $t0, $s5, $sp
+beq $t0, $zero, continuaExecutando
+addi $s4, $s4, -8
+
+j arrumaPilha
+continuaExecutando:
+
+lw $a0, 4($s4)
+lw $a1, 4($s5)
+add $s6, $zero, $ra
+jal compararStrings
+add $ra, $zero, $s6
+addi $t0, $zero, 2
+beq $t0, $v0, tirarCategoriasIguais
+j categoriasDiferentes
+tirarCategoriasIguais:
+l.s $f0, 0($s4)
+l.s $f1, 0($s5)
+add.s $f2, $f1, $f0
+s.s $f2, 0($s4)
+l.s $f0, 0($sp)
+s.s $f0, 0($s5)
+lw $s0, 4($sp)
+sw $s0, 4($s5)
+addi $sp, $sp, 8
+j for1TirarIguais
+categoriasDiferentes:
+addi $s5, $s5, -8
+j for1TirarIguais
+terminouDeTirarIguais:
+
+jr $ra
+
+###############################################
+
+imprimirPilha:
+printarPilha:
+bne $a3, $sp, printPilha
+j jaPrintouPilha
+printPilha:
+
+li $v0, 4
+la $a0, msgCategoria2
+syscall
+
+li $v0, 4
+lw $s1, 4($sp)
+addi $a0, $s1, 0
+syscall
+
+li $v0, 4
+la $a0, msgValor2
+syscall
+
+addi $v0, $zero, 2
+l.s $f12, 0($sp)
+syscall
+
+jal quebrarLinha
+jal quebrarLinha
+
+addi $sp, $sp, 8
+j printarPilha
+jaPrintouPilha:
+jr $ra
+
+
+###############################################
+
+compararStrings:
+addi $s7, $zero, -1
+addi $t5, $zero, 10
+# se a primeira string recebida for > a segunda, return 0
+# caso contrário, return 1
+# iguais, return 2
+# endereços: palavra1 em a0 e palavra2 em a1
+# numero retornado em v0
+addi $t0, $zero, 0
+compararStringsFor1:
+lw $s1, 0($a0)
+lb $s2, 0($a1)
+addi $a0, $a0, 1
+addi $a1, $a1, 1
+beq $s1, $t5, compararSegunda
+beq $s2, $t5, compararPrimeira
+beq $s1, $s2, compararStringsFor1
+slt $s7, $s1, $s2
+j fimCompararStrings
+compararSegunda:
+beq $s2, $t5, stringsIguais
+addi $s7, $zero, 0
+j fimCompararStrings
+stringsIguais:
+addi $s7, $zero, 2
+j fimCompararStrings
+compararPrimeira:
+beq $s1, $t5, stringsIguais
+addi $s7, $zero, 1
+j fimCompararStrings
+
+
+fimCompararStrings:
+
+add $v0, $zero, $s7
+jr $ra
+
+
 	
 exit:
 		li $v0, 10
